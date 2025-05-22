@@ -72,22 +72,10 @@ class block_ai_control extends block_base {
                 !has_capability('local/ai_manager:use', $context)) {
             return $this->content;
         }
-        $tenant = \core\di::get(\local_ai_manager\local\tenant::class);
-        $configmanager = \core\di::get(\local_ai_manager\local\config_manager::class);
-        $aiconfig = ai_manager_utils::get_ai_config($USER);
-        $chatconfig = array_values(array_filter($aiconfig['purposes'], fn($purpose) => $purpose['purpose'] === 'chat'))[0];
-        if (!$tenant->is_tenant_allowed()) {
+        $aiconfig = ai_manager_utils::get_ai_config($USER, $context->id);
+
+        if ($aiconfig['availability']['available'] === ai_manager_utils::AVAILABILITY_HIDDEN) {
             return $this->content;
-        }
-        if ($tenant->is_tenant_allowed() && !$configmanager->is_tenant_enabled()) {
-            if ($aiconfig['role'] === userinfo::get_role_as_string(userinfo::ROLE_BASIC)) {
-                return $this->content;
-            }
-        }
-        if (!$chatconfig['isconfigured']) {
-            if ($aiconfig['role'] === userinfo::get_role_as_string(userinfo::ROLE_BASIC)) {
-                return $this->content;
-            }
         }
 
         $this->content = new stdClass;
