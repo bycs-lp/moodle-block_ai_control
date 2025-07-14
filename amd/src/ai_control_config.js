@@ -69,7 +69,8 @@ export const init = async(element, aiconfigObject) => {
         const purposeConfig = {
             checked: purpose.allowed,
             identifier: 'purpose_' + purpose.name,
-            text: purpose.displayname
+            text: purpose.displayname,
+            purposename: purpose.name
         };
         templateContext.purposes.push(purposeConfig);
     });

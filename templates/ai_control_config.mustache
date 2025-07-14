@@ -27,11 +27,17 @@
         "expiresat": 1707822000,
         "purposes": [
             {
-                "name": "chat",
+                "purposename": "chat",
+                "checked": true,
+                "identifier": "purpose_chat",
+                "text": "Chat",
                 "allowed": true
             },
             {
-                "name": "translate",
+                "purposename": "translate",
+                "checked": "false",
+                "identifier": "purpose_translate",
+                "text": "Translate",
                 "allowed": false,
             }
         ]
@@ -53,8 +59,9 @@
     </div>
     <div data-aicontrol="purposeslist" class="mb-3 {{^checked}}d-none{{/checked}}">
         {{#purposes}}
-            <div>
+            <div class="d-flex flex-row justify-content-between align-items-center" data-purposename="{{purposename}}">
                 {{> local_ai_manager/toggle }}
+                {{> local_ai_manager/purposeinfoicon }}
             </div>
         {{/purposes}}
     </div>
