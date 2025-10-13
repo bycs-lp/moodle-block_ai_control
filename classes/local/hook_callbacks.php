@@ -41,8 +41,12 @@ class hook_callbacks {
         if ($configmanager->is_tenant_enabled()) {
             $mform = $hook->mform;
             ai_manager_utils::add_ai_tools_category_to_mform($mform);
-            $mform->addElement('checkbox', 'addaicontrol', get_string('pluginname', 'block_ai_control'),
-                    get_string('addblockinstance', 'block_ai_control'));
+            $mform->addElement(
+                'checkbox',
+                'addaicontrol',
+                get_string('pluginname', 'block_ai_control'),
+                get_string('addblockinstance', 'block_ai_control')
+            );
             $mform->addHelpButton('addaicontrol', 'addblockinstance', 'block_ai_control');
             $mform->setDefault('addaicontrol', 0);
         }
@@ -63,13 +67,15 @@ class hook_callbacks {
         $courseid = $data->id;
         $coursecontextid = \context_course::instance($courseid)->id;
 
-        $existingblockinstance = $DB->get_record('block_instances',
-                ['blockname' => 'ai_control', 'parentcontextid' => $coursecontextid]);
+        $existingblockinstance = $DB->get_record(
+            'block_instances',
+            ['blockname' => 'ai_control', 'parentcontextid' => $coursecontextid]
+        );
 
         if (!empty($data->addaicontrol)) {
             if (!$existingblockinstance) {
                 // Add block instance.
-                $newinstance = new \stdClass;
+                $newinstance = new \stdClass();
                 $newinstance->blockname = 'ai_control';
                 $newinstance->parentcontextid = $coursecontextid;
                 // We want to make the block usable for single activity courses as well, so display in subcontexts.
@@ -110,8 +116,10 @@ class hook_callbacks {
             $courseid = $formwrapper->get_course()->id;
             $coursecontextid = \context_course::instance($courseid)->id;
 
-            $blockinstance = $DB->get_record('block_instances',
-                    ['blockname' => 'ai_control', 'parentcontextid' => $coursecontextid]);
+            $blockinstance = $DB->get_record(
+                'block_instances',
+                ['blockname' => 'ai_control', 'parentcontextid' => $coursecontextid]
+            );
             if ($blockinstance) {
                 // Block present, so set checkbox accordingly.
                 $mform->setDefault('addaicontrol', 1);
@@ -134,8 +142,11 @@ class hook_callbacks {
             return;
         }
         $aiconfig = new aiconfig($coursecontext->id);
-        if (!$aiconfig->record_exists() || !$aiconfig->is_enabled() ||
-                !in_array($hook->get_purpose()->get_plugin_name(), $aiconfig->get_enabledpurposes())) {
+        if (
+            !$aiconfig->record_exists()
+            || !$aiconfig->is_enabled()
+            || !in_array($hook->get_purpose()->get_plugin_name(), $aiconfig->get_enabledpurposes())
+        ) {
             if (!has_capability('block/ai_control:control', $coursecontext)) {
                 $hook->set_access_allowed(false, 403, get_string('notallowedincourse', 'block_ai_control'));
             }

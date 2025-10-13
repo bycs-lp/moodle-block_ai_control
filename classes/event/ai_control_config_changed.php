@@ -27,7 +27,6 @@ use block_ai_control\local\aiconfig;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class ai_control_config_changed extends \core\event\base {
-
     /**
      * Init function for this event, setting some basic attributes.
      */

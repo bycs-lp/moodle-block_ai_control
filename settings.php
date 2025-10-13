@@ -26,15 +26,22 @@
 defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
-
-    $ADMIN->add('blocksettings', new admin_category('block_ai_control_settings',
-            new lang_string('pluginname', 'block_ai_control')));
+    $ADMIN->add(
+        'blocksettings',
+        new admin_category(
+            'block_ai_control_settings',
+            new lang_string('pluginname', 'block_ai_control')
+        )
+    );
 
     if ($ADMIN->fulltree) {
-        $settings->add(new admin_setting_confightmleditor('block_ai_control/infotext',
+        $settings->add(
+            new admin_setting_confightmleditor(
+                'block_ai_control/infotext',
                 new lang_string('infotext', 'block_ai_control'),
                 new lang_string('infotextdesc', 'block_ai_control'),
                 '',
-        ));
+            )
+        );
     }
 }

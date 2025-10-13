@@ -28,7 +28,6 @@ use context;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class aiconfig {
-
     /** @var int Constant representing that the AI tools are enabled in this context */
     const ENABLED = 1;
 

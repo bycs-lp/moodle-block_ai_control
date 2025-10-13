@@ -28,7 +28,6 @@ use local_ai_manager\local\userinfo;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class hook_callbacks_test extends \advanced_testcase {
-
     /**
      * Tests the creation and storing of the aiconfig object.
      *
@@ -44,8 +43,14 @@ final class hook_callbacks_test extends \advanced_testcase {
      *  means the user usually has the teacher role in the course
      * @param bool $expected the expected output: true, if the hook is allowing access, false otherwise
      */
-    public function test_handle_additional_user_restriction(bool $aiconfigexists,
-            bool $enabled, bool $purposeenabled, bool $coursecontext, bool $controlcapability, bool $expected): void {
+    public function test_handle_additional_user_restriction(
+        bool $aiconfigexists,
+        bool $enabled,
+        bool $purposeenabled,
+        bool $coursecontext,
+        bool $controlcapability,
+        bool $expected
+    ): void {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -91,43 +96,43 @@ final class hook_callbacks_test extends \advanced_testcase {
      */
     public static function handle_additional_user_restriction_provider(): array {
         $allgoodconfig = [
-                'aiconfigexists' => true,
-                'enabled' => true,
-                'purposeenabled' => true,
-                'coursecontext' => true,
-                'controlcapability' => false,
+            'aiconfigexists' => true,
+            'enabled' => true,
+            'purposeenabled' => true,
+            'coursecontext' => true,
+            'controlcapability' => false,
         ];
         return [
-                'noaiconfig' => [
-                        ...$allgoodconfig,
-                        'aiconfigexists' => false,
-                        'expected' => false,
-                ],
-                'studentallowed' => [
-                        ...$allgoodconfig,
-                        'expected' => true,
-                ],
-                'notenabled' => [
-                        ...$allgoodconfig,
-                        'enabled' => false,
-                        'expected' => false,
-                ],
-                'purposedisabled' => [
-                        ...$allgoodconfig,
-                        'purposeenabled' => false,
-                        'expected' => false,
-                ],
-                'disabledbutteacher' => [
-                        ...$allgoodconfig,
-                        'controlcapability' => true,
-                        'expected' => true,
-                ],
-                'disabledbutothercontext' => [
-                        ...$allgoodconfig,
-                        'enabled' => false,
-                        'coursecontext' => false,
-                        'expected' => true,
-                ],
+            'noaiconfig' => [
+                ...$allgoodconfig,
+                'aiconfigexists' => false,
+                'expected' => false,
+            ],
+            'studentallowed' => [
+                ...$allgoodconfig,
+                'expected' => true,
+            ],
+            'notenabled' => [
+                ...$allgoodconfig,
+                'enabled' => false,
+                'expected' => false,
+            ],
+            'purposedisabled' => [
+                ...$allgoodconfig,
+                'purposeenabled' => false,
+                'expected' => false,
+            ],
+            'disabledbutteacher' => [
+                ...$allgoodconfig,
+                'controlcapability' => true,
+                'expected' => true,
+            ],
+            'disabledbutothercontext' => [
+                ...$allgoodconfig,
+                'enabled' => false,
+                'coursecontext' => false,
+                'expected' => true,
+            ],
         ];
     }
 

@@ -27,7 +27,6 @@ use local_ai_manager\local\userinfo;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_ai_control extends block_base {
-
     /**
      * Initialize block
      *
@@ -68,8 +67,10 @@ class block_ai_control extends block_base {
         $this->content->footer = '';
 
         $context = \context_block::instance($this->instance->id);
-        if (!has_capability('block/ai_control:view', $context) ||
-                !has_capability('local/ai_manager:use', $context)) {
+        if (
+            !has_capability('block/ai_control:view', $context)
+            || !has_capability('local/ai_manager:use', $context)
+        ) {
             return $this->content;
         }
         $aiconfig = ai_manager_utils::get_ai_config($USER, $context->id);
@@ -78,16 +79,18 @@ class block_ai_control extends block_base {
             return $this->content;
         }
 
-        $this->content = new stdClass;
+        $this->content = new stdClass();
 
         $coursecontext = ai_manager_utils::find_closest_parent_course_context($context);
         if (is_null($coursecontext)) {
             throw new \coding_exception('Could not find parent course context for block instance. '
-                    . 'Other situations are not supported (yet).');
+                . 'Other situations are not supported (yet).');
         }
 
-        $this->content->text = $OUTPUT->render_from_template('block_ai_control/ai_control',
-                ['contextid' => $coursecontext->id, 'cancontrol' => has_capability('block/ai_control:control', $context)]);
+        $this->content->text = $OUTPUT->render_from_template(
+            'block_ai_control/ai_control',
+            ['contextid' => $coursecontext->id, 'cancontrol' => has_capability('block/ai_control:control', $context)]
+        );
 
         return $this->content;
     }
@@ -118,10 +121,10 @@ class block_ai_control extends block_base {
     #[\Override]
     public function applicable_formats(): array {
         return [
-                'course-view' => true,
-                'site' => false,
-                'mod' => false,
-                'my' => false,
+            'course-view' => true,
+            'site' => false,
+            'mod' => false,
+            'my' => false,
         ];
     }
 

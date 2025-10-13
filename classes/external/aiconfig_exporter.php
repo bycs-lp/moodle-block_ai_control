@@ -31,7 +31,6 @@ use renderer_base;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class aiconfig_exporter extends exporter {
-
     /**
      * Definition of basic properties.
      *
@@ -39,19 +38,19 @@ class aiconfig_exporter extends exporter {
      */
     protected static function define_properties(): array {
         return [
-                'id' => [
-                        'type' => PARAM_INT,
-                ],
-                'enabled' => [
-                        'type' => PARAM_BOOL,
-                ],
-                'expiresat' => [
-                        'type' => PARAM_INT,
-                ],
-                'purposes' => [
-                        'type' => purpose_exporter::read_properties_definition(),
-                        'multiple' => true,
-                ],
+            'id' => [
+                'type' => PARAM_INT,
+            ],
+            'enabled' => [
+                'type' => PARAM_BOOL,
+            ],
+            'expiresat' => [
+                'type' => PARAM_INT,
+            ],
+            'purposes' => [
+                'type' => purpose_exporter::read_properties_definition(),
+                'multiple' => true,
+            ],
         ];
     }
 
@@ -62,15 +61,15 @@ class aiconfig_exporter extends exporter {
      */
     protected static function define_other_properties(): array {
         return [
-                'expiresatFormatted' => [
-                        'type' => PARAM_TEXT,
-                ],
-                'infoText' => [
-                        'type' => PARAM_RAW,
-                ],
-                'showviewprompts' => [
-                        'type' => PARAM_BOOL,
-                ],
+            'expiresatFormatted' => [
+                'type' => PARAM_TEXT,
+            ],
+            'infoText' => [
+                'type' => PARAM_RAW,
+            ],
+            'showviewprompts' => [
+                'type' => PARAM_BOOL,
+            ],
         ];
     }
 
@@ -81,8 +80,8 @@ class aiconfig_exporter extends exporter {
      */
     protected static function define_related(): array {
         return [
-                'context' => 'context',
-                'aiconfig' => 'block_ai_control\\local\\aiconfig',
+            'context' => 'context',
+            'aiconfig' => 'block_ai_control\\local\\aiconfig',
         ];
     }
 
@@ -94,10 +93,12 @@ class aiconfig_exporter extends exporter {
      */
     protected function get_other_values(renderer_base $output): array {
         return [
-                'expiresatFormatted' => userdate($this->related['aiconfig']->get_expiresat(),
-                        get_string('strftimedatetime', 'langconfig')),
-                'infoText' => get_config('block_ai_control', 'infotext'),
-                'showviewprompts' => has_capability('local/ai_manager:viewprompts', $this->related['context']),
+            'expiresatFormatted' => userdate(
+                $this->related['aiconfig']->get_expiresat(),
+                get_string('strftimedatetime', 'langconfig')
+            ),
+            'infoText' => get_config('block_ai_control', 'infotext'),
+            'showviewprompts' => has_capability('local/ai_manager:viewprompts', $this->related['context']),
         ];
     }
 
@@ -112,19 +113,19 @@ class aiconfig_exporter extends exporter {
         $purposes = [];
         foreach (base_purpose::get_all_purposes() as $purpose) {
             $purposeobject =
-                    \core\di::get(\local_ai_manager\local\connector_factory::class)->get_purpose_by_purpose_string($purpose);
+                \core\di::get(\local_ai_manager\local\connector_factory::class)->get_purpose_by_purpose_string($purpose);
             $purposedata = purpose_exporter::export_purpose_data($aiconfig, $purposeobject);
             $purposeexporter =
-                    new purpose_exporter($purposedata, ['context' => $aiconfig->get_context(), 'purpose' => $purposeobject]);
+                new purpose_exporter($purposedata, ['context' => $aiconfig->get_context(), 'purpose' => $purposeobject]);
             $output = $PAGE->get_renderer('core');
             $purposes[] = $purposeexporter->export($output);
         }
 
         return [
-                'id' => $aiconfig->get_context()->id,
-                'enabled' => $aiconfig->is_enabled(),
-                'expiresat' => $aiconfig->get_expiresat(),
-                'purposes' => $purposes,
+            'id' => $aiconfig->get_context()->id,
+            'enabled' => $aiconfig->is_enabled(),
+            'expiresat' => $aiconfig->get_expiresat(),
+            'purposes' => $purposes,
         ];
     }
 }
