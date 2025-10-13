@@ -28,8 +28,9 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->release = 'v2.0';
 $plugin->version = 2025071200;
 $plugin->requires = 2024042200;
+$plugin->supported = [500, 501];
 $plugin->component = 'block_ai_control';
-$plugin->maturity = MATURITY_BETA;
+$plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [
     'local_ai_manager' => 2025071200,
 ];
