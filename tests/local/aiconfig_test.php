@@ -27,7 +27,6 @@ use local_ai_manager\base_purpose;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class aiconfig_test extends \advanced_testcase {
-
     /**
      * Tests the creation and storing of the aiconfig object.
      *

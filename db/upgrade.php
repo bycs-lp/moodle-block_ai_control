@@ -34,7 +34,6 @@ function xmldb_block_ai_control_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2025030400) {
-
         $table = new xmldb_table('block_ai_control_config');
         $key = new xmldb_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
         $dbman->drop_key($table, $key);

@@ -18,7 +18,6 @@ namespace block_ai_control\external;
 
 use block_ai_control\local\aiconfig;
 use core\external\exporter;
-
 use local_ai_manager\base_purpose;
 use renderer_base;
 
@@ -31,7 +30,6 @@ use renderer_base;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class purpose_exporter extends exporter {
-
     /**
      * Definition of basic properties.
      *
