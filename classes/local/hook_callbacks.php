@@ -148,7 +148,7 @@ class hook_callbacks {
             || !in_array($hook->get_purpose()->get_plugin_name(), $aiconfig->get_enabledpurposes())
         ) {
             if (!has_capability('block/ai_control:control', $coursecontext)) {
-                $hook->set_access_allowed(false, 403, get_string('notallowedincourse', 'block_ai_control'));
+                $hook->set_access_allowed(false, 403, get_string('notallowedincourse', 'block_ai_control', $hook->get_purpose()->get_plugin_name()));
             }
         }
     }
