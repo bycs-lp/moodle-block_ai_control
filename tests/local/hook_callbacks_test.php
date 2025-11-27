@@ -42,6 +42,7 @@ final class hook_callbacks_test extends \advanced_testcase {
      * @param bool $controlcapability if the user used for testing should have the 'block/ai_control:control' capability, which
      *  means the user usually has the teacher role in the course
      * @param bool $expected the expected output: true, if the hook is allowing access, false otherwise
+     * @param string|null $expectedmessage the expected message if access is blocked
      */
     public function test_handle_additional_user_restriction(
         bool $aiconfigexists,
@@ -49,7 +50,8 @@ final class hook_callbacks_test extends \advanced_testcase {
         bool $purposeenabled,
         bool $coursecontext,
         bool $controlcapability,
-        bool $expected
+        bool $expected,
+        ?string $expectedmessage
     ): void {
         $this->resetAfterTest();
 
@@ -84,8 +86,10 @@ final class hook_callbacks_test extends \advanced_testcase {
         hook_callbacks::handle_additional_user_restriction($hook);
         if ($expected) {
             $this->assertTrue($hook->is_allowed());
+            $this->assertSame('', $hook->get_message());
         } else {
             $this->assertFalse($hook->is_allowed());
+            $this->assertSame($expectedmessage, $hook->get_message());
         }
     }
 
@@ -107,31 +111,37 @@ final class hook_callbacks_test extends \advanced_testcase {
                 ...$allgoodconfig,
                 'aiconfigexists' => false,
                 'expected' => false,
+                'expectedmessage' => get_string('noaiincourse', 'block_ai_control'),
             ],
             'studentallowed' => [
                 ...$allgoodconfig,
                 'expected' => true,
+                'expectedmessage' => null,
             ],
             'notenabled' => [
                 ...$allgoodconfig,
                 'enabled' => false,
                 'expected' => false,
+                'expectedmessage' => get_string('noaiincourse', 'block_ai_control'),
             ],
             'purposedisabled' => [
                 ...$allgoodconfig,
                 'purposeenabled' => false,
                 'expected' => false,
+                'expectedmessage' => get_string('notallowedincourse', 'block_ai_control', 'chat'),
             ],
             'disabledbutteacher' => [
                 ...$allgoodconfig,
                 'controlcapability' => true,
                 'expected' => true,
+                'expectedmessage' => null,
             ],
             'disabledbutothercontext' => [
                 ...$allgoodconfig,
                 'enabled' => false,
                 'coursecontext' => false,
                 'expected' => true,
+                'expectedmessage' => null,
             ],
         ];
     }

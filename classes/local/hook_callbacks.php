@@ -142,22 +142,16 @@ class hook_callbacks {
             return;
         }
         $aiconfig = new aiconfig($coursecontext->id);
-        if (
-            !$aiconfig->record_exists()
-            || !$aiconfig->is_enabled()
-            || !in_array($hook->get_purpose()->get_plugin_name(), $aiconfig->get_enabledpurposes())
-        ) {
-            if (!has_capability('block/ai_control:control', $coursecontext)) {
-                $hook->set_access_allowed(
-                    false,
-                    403,
-                    get_string(
-                        'notallowedincourse',
-                        'block_ai_control',
-                        $hook->get_purpose()->get_plugin_name()
-                    )
-                );
-            }
+
+        $message = null;
+        if (!$aiconfig->record_exists() || !$aiconfig->is_enabled()) {
+            $message = get_string('noaiincourse', 'block_ai_control');
+        } else if (!in_array($hook->get_purpose()->get_plugin_name(), $aiconfig->get_enabledpurposes())) {
+            $message = get_string('notallowedincourse', 'block_ai_control', $hook->get_purpose()->get_plugin_name());
+        }
+
+        if ($message !== null && !has_capability('block/ai_control:control', $coursecontext)) {
+            $hook->set_access_allowed(false, 403, $message);
         }
     }
 }

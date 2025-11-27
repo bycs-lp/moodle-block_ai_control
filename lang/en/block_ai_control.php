@@ -38,6 +38,7 @@ $string['infotext'] = 'Warning hint when enabling AI functionalities';
 $string['infotextdesc'] = 'Here you can provide a warning message that will be displayed when AI functions are about to be enabled. For example, you could inform trainers that they have to make sure that participants are properly informed about data protection and usage of the AI tools.';
 $string['infotextmodalheading'] = 'Warning';
 $string['notallowedincourse'] = 'At the moment, you are not allowed to use the AI tool {$a} in this course.';
+$string['noaiincourse'] = 'AI tools are not available in this course.';
 $string['pluginname'] = 'AI control center';
 $string['privacy:metadata'] = 'This plugin does not store any personal data.';
 $string['savestate'] = 'Save';
