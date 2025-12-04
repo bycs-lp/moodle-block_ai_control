@@ -128,7 +128,11 @@ final class hook_callbacks_test extends \advanced_testcase {
                 ...$allgoodconfig,
                 'purposeenabled' => false,
                 'expected' => false,
-                'expectedmessage' => get_string('notallowedincourse', 'block_ai_control', 'chat'),
+                'expectedmessage' => get_string(
+                    'notallowedincourse',
+                    'block_ai_control',
+                    get_string('pluginname', 'aipurpose_chat')
+                ),
             ],
             'disabledbutteacher' => [
                 ...$allgoodconfig,
