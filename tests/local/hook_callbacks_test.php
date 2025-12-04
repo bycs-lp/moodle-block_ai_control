@@ -42,7 +42,7 @@ final class hook_callbacks_test extends \advanced_testcase {
      * @param bool $controlcapability if the user used for testing should have the 'block/ai_control:control' capability, which
      *  means the user usually has the teacher role in the course
      * @param bool $expected the expected output: true, if the hook is allowing access, false otherwise
-     * @param string|null $expectedmessage the expected message if access is blocked
+     * @param ?string $expectedmessage the expected message if access is blocked
      */
     public function test_handle_additional_user_restriction(
         bool $aiconfigexists,
