@@ -36,6 +36,9 @@ let baseElement = null;
  */
 export const init = async(selector) => {
     baseElement = document.querySelector(selector);
+    if (!baseElement) {
+        return;
+    }
     const contextid = baseElement.dataset.contextid;
     const infoArea = baseElement.querySelector('[data-aicontrol="info"]');
     const controlArea = baseElement.querySelector('[data-aicontrol="config"]');
