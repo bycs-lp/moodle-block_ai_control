@@ -80,12 +80,16 @@ export const init = async(element, aiconfigObject) => {
 
     baseElement.querySelectorAll('[data-aicontrol-item^="switchexpiryview"]').forEach(button => {
         button.addEventListener('click', () => {
-            updateTargetTime();
+            // First read the value from the currently visible view and update currentTargetTime.
+            updateTargetTimeFromCurrentView();
+            // Then toggle visibility.
             const elementsToToggleVisibility = baseElement.querySelectorAll('[data-aicontrol-show]');
             elementsToToggleVisibility.forEach(element => {
                 element.dataset.aiconfigShow = element.dataset.aiconfigShow === '1' ? '0' : '1';
                 element.classList.toggle('d-none');
             });
+            // Finally update both display values based on the stored currentTargetTime.
+            updateDisplayValues();
         });
     });
 
@@ -173,15 +177,36 @@ const dispatchChangedEvent = (refreshedAiconfig) => {
     }));
 };
 
-const updateTargetTime = () => {
+/**
+ * Updates the display values for both date and duration inputs based on currentTargetTime.
+ * This does NOT recalculate currentTargetTime, it only syncs the UI.
+ */
+const updateDisplayValues = () => {
+    const expirydurationDays = baseElement.querySelector('[data-aicontrol-item="expiryduration_days"]');
+    const expirydurationHours = baseElement.querySelector('[data-aicontrol-item="expiryduration_hours"]');
+    const expirydurationMinutes = baseElement.querySelector('[data-aicontrol-item="expiryduration_minutes"]');
+    const dateElement = baseElement.querySelector('[data-aicontrol-item="expirydate"]');
+
+    dateElement.value = convertUnixtimeToDateElementFormat(currentTargetTime);
+
+    const {days, hours, minutes} = convertTargetUnixTimeToCountdown(currentTargetTime);
+    expirydurationDays.value = days;
+    expirydurationHours.value = hours;
+    expirydurationMinutes.value = minutes;
+};
+
+/**
+ * Reads the value from the currently visible view and updates currentTargetTime.
+ */
+const updateTargetTimeFromCurrentView = () => {
     const durationElement = baseElement.querySelector('[data-aicontrol-item="expiryduration"]');
     const expirydurationDays = baseElement.querySelector('[data-aicontrol-item="expiryduration_days"]');
     const expirydurationHours = baseElement.querySelector('[data-aicontrol-item="expiryduration_hours"]');
     const expirydurationMinutes = baseElement.querySelector('[data-aicontrol-item="expiryduration_minutes"]');
-
     const dateElement = baseElement.querySelector('[data-aicontrol-item="expirydate"]');
 
     if (durationElement.dataset.aiconfigShow === '1') {
+        // Duration view is visible, calculate target time from duration.
         const currentTime = new Date();
         currentTargetTime = currentTime.getTime()
             + (expirydurationDays.value * 24 * 60 * 60 * 1000)
@@ -189,16 +214,22 @@ const updateTargetTime = () => {
             + (expirydurationMinutes.value * 60 * 1000);
         currentTargetTime = Math.round(currentTargetTime / 1000);
     } else {
-        currentTargetTime = Math.round(parseInt(+new Date(dateElement.value)) / 1000);
+        // Date view is visible, read directly from the date input.
+        // The datetime-local input value is in local time format (YYYY-MM-DDTHH:mm),
+        // but new Date() parses it as local time. We need to get the correct UTC timestamp.
+        const localDate = new Date(dateElement.value);
+        // Add timezone offset back since convertUnixtimeToDateElementFormat subtracted it.
+        localDate.setTime(localDate.getTime() + localDate.getTimezoneOffset() * 60 * 1000);
+        currentTargetTime = Math.round(localDate.getTime() / 1000);
     }
+};
 
-    // Now our global time is set correctly, we can update both UI elements.
-    dateElement.value = convertUnixtimeToDateElementFormat(currentTargetTime);
-
-    const {days, hours, minutes} = convertTargetUnixTimeToCountdown(currentTargetTime);
-    expirydurationDays.value = days;
-    expirydurationHours.value = hours;
-    expirydurationMinutes.value = minutes;
+/**
+ * Updates the target time based on the currently visible view and syncs all UI elements.
+ */
+const updateTargetTime = () => {
+    updateTargetTimeFromCurrentView();
+    updateDisplayValues();
 };
 
 /**
