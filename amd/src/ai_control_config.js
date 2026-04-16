@@ -215,11 +215,9 @@ const updateTargetTimeFromCurrentView = () => {
         currentTargetTime = Math.round(currentTargetTime / 1000);
     } else {
         // Date view is visible, read directly from the date input.
-        // The datetime-local input value is in local time format (YYYY-MM-DDTHH:mm),
-        // but new Date() parses it as local time. We need to get the correct UTC timestamp.
+        // The datetime-local input value is in local time format (YYYY-MM-DDTHH:mm).
+        // new Date() parses it as local time, so getTime() already returns the correct UTC timestamp.
         const localDate = new Date(dateElement.value);
-        // Add timezone offset back since convertUnixtimeToDateElementFormat subtracted it.
-        localDate.setTime(localDate.getTime() + localDate.getTimezoneOffset() * 60 * 1000);
         currentTargetTime = Math.round(localDate.getTime() / 1000);
     }
 };
@@ -237,11 +235,15 @@ const updateTargetTime = () => {
  *
  * It will convert it into the local time of the user's browser.
  *
- * @param {number} unixtime the unix time stamp in seconds sind 1/1/1970
+ * @param {number} unixtime the unix time stamp in seconds since 1/1/1970
  * @returns {string} the string to be set as value of the input datetime-local element
  */
 const convertUnixtimeToDateElementFormat = (unixtime) => {
     const localTargetTime = new Date(unixtime * 1000);
-    localTargetTime.setTime(localTargetTime.getTime() - localTargetTime.getTimezoneOffset() * 60 * 1000);
-    return localTargetTime.toISOString().slice(0, 16);
+    const year = localTargetTime.getFullYear();
+    const month = String(localTargetTime.getMonth() + 1).padStart(2, '0');
+    const day = String(localTargetTime.getDate()).padStart(2, '0');
+    const hours = String(localTargetTime.getHours()).padStart(2, '0');
+    const minutes = String(localTargetTime.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
