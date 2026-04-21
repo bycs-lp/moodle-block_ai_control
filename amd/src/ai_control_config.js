@@ -41,6 +41,11 @@ let aiconfig = null;
  */
 let currentTargetTime = 0;
 
+/**
+ * @type {boolean} Whether the duration inputs have been manually edited by the user.
+ */
+let durationManuallyEdited = false;
+
 
 /**
  * Init the handler for the control area of block_ai_control.
@@ -90,6 +95,19 @@ export const init = async(element, aiconfigObject) => {
             });
             // Finally update both display values based on the stored currentTargetTime.
             updateDisplayValues();
+            // Reset the flag after switching views.
+            durationManuallyEdited = false;
+        });
+    });
+
+    // Track manual edits to duration inputs.
+    baseElement.querySelectorAll(
+        '[data-aicontrol-item="expiryduration_days"],'
+        + '[data-aicontrol-item="expiryduration_hours"],'
+        + '[data-aicontrol-item="expiryduration_minutes"]'
+    ).forEach(input => {
+        input.addEventListener('input', () => {
+            durationManuallyEdited = true;
         });
     });
 
@@ -206,17 +224,18 @@ const updateTargetTimeFromCurrentView = () => {
     const dateElement = baseElement.querySelector('[data-aicontrol-item="expirydate"]');
 
     if (durationElement.dataset.aiconfigShow === '1') {
-        // Duration view is visible, calculate target time from duration.
-        const currentTime = new Date();
-        currentTargetTime = currentTime.getTime()
-            + (expirydurationDays.value * 24 * 60 * 60 * 1000)
-            + (expirydurationHours.value * 60 * 60 * 1000)
-            + (expirydurationMinutes.value * 60 * 1000);
-        currentTargetTime = Math.round(currentTargetTime / 1000);
+        // Duration view is visible — only recalculate if the user actually changed the inputs.
+        if (durationManuallyEdited) {
+            const currentTime = new Date();
+            currentTargetTime = currentTime.getTime()
+                + (expirydurationDays.value * 24 * 60 * 60 * 1000)
+                + (expirydurationHours.value * 60 * 60 * 1000)
+                + (expirydurationMinutes.value * 60 * 1000);
+            currentTargetTime = Math.round(currentTargetTime / 1000);
+        }
+        // If not manually edited, keep currentTargetTime as-is — no precision loss.
     } else {
         // Date view is visible, read directly from the date input.
-        // The datetime-local input value is in local time format (YYYY-MM-DDTHH:mm).
-        // new Date() parses it as local time, so getTime() already returns the correct UTC timestamp.
         const localDate = new Date(dateElement.value);
         currentTargetTime = Math.round(localDate.getTime() / 1000);
     }
