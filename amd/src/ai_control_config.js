@@ -41,6 +41,11 @@ let aiconfig = null;
  */
 let currentTargetTime = 0;
 
+/**
+ * @type {boolean} Whether the duration inputs have been manually edited by the user.
+ */
+let durationManuallyEdited = false;
+
 
 /**
  * Init the handler for the control area of block_ai_control.
@@ -80,12 +85,29 @@ export const init = async(element, aiconfigObject) => {
 
     baseElement.querySelectorAll('[data-aicontrol-item^="switchexpiryview"]').forEach(button => {
         button.addEventListener('click', () => {
-            updateTargetTime();
+            // First read the value from the currently visible view and update currentTargetTime.
+            updateTargetTimeFromCurrentView();
+            // Then toggle visibility.
             const elementsToToggleVisibility = baseElement.querySelectorAll('[data-aicontrol-show]');
             elementsToToggleVisibility.forEach(element => {
                 element.dataset.aiconfigShow = element.dataset.aiconfigShow === '1' ? '0' : '1';
                 element.classList.toggle('d-none');
             });
+            // Finally update both display values based on the stored currentTargetTime.
+            updateDisplayValues();
+            // Reset the flag after switching views.
+            durationManuallyEdited = false;
+        });
+    });
+
+    // Track manual edits to duration inputs.
+    baseElement.querySelectorAll(
+        '[data-aicontrol-item="expiryduration_days"],'
+        + '[data-aicontrol-item="expiryduration_hours"],'
+        + '[data-aicontrol-item="expiryduration_minutes"]'
+    ).forEach(input => {
+        input.addEventListener('input', () => {
+            durationManuallyEdited = true;
         });
     });
 
@@ -173,26 +195,16 @@ const dispatchChangedEvent = (refreshedAiconfig) => {
     }));
 };
 
-const updateTargetTime = () => {
-    const durationElement = baseElement.querySelector('[data-aicontrol-item="expiryduration"]');
+/**
+ * Updates the display values for both date and duration inputs based on currentTargetTime.
+ * This does NOT recalculate currentTargetTime, it only syncs the UI.
+ */
+const updateDisplayValues = () => {
     const expirydurationDays = baseElement.querySelector('[data-aicontrol-item="expiryduration_days"]');
     const expirydurationHours = baseElement.querySelector('[data-aicontrol-item="expiryduration_hours"]');
     const expirydurationMinutes = baseElement.querySelector('[data-aicontrol-item="expiryduration_minutes"]');
-
     const dateElement = baseElement.querySelector('[data-aicontrol-item="expirydate"]');
 
-    if (durationElement.dataset.aiconfigShow === '1') {
-        const currentTime = new Date();
-        currentTargetTime = currentTime.getTime()
-            + (expirydurationDays.value * 24 * 60 * 60 * 1000)
-            + (expirydurationHours.value * 60 * 60 * 1000)
-            + (expirydurationMinutes.value * 60 * 1000);
-        currentTargetTime = Math.round(currentTargetTime / 1000);
-    } else {
-        currentTargetTime = Math.round(parseInt(+new Date(dateElement.value)) / 1000);
-    }
-
-    // Now our global time is set correctly, we can update both UI elements.
     dateElement.value = convertUnixtimeToDateElementFormat(currentTargetTime);
 
     const {days, hours, minutes} = convertTargetUnixTimeToCountdown(currentTargetTime);
@@ -202,15 +214,55 @@ const updateTargetTime = () => {
 };
 
 /**
+ * Reads the value from the currently visible view and updates currentTargetTime.
+ */
+const updateTargetTimeFromCurrentView = () => {
+    const durationElement = baseElement.querySelector('[data-aicontrol-item="expiryduration"]');
+    const expirydurationDays = baseElement.querySelector('[data-aicontrol-item="expiryduration_days"]');
+    const expirydurationHours = baseElement.querySelector('[data-aicontrol-item="expiryduration_hours"]');
+    const expirydurationMinutes = baseElement.querySelector('[data-aicontrol-item="expiryduration_minutes"]');
+    const dateElement = baseElement.querySelector('[data-aicontrol-item="expirydate"]');
+
+    if (durationElement.dataset.aiconfigShow === '1') {
+        // Duration view is visible — only recalculate if the user actually changed the inputs.
+        if (durationManuallyEdited) {
+            const currentTime = new Date();
+            currentTargetTime = currentTime.getTime()
+                + (expirydurationDays.value * 24 * 60 * 60 * 1000)
+                + (expirydurationHours.value * 60 * 60 * 1000)
+                + (expirydurationMinutes.value * 60 * 1000);
+            currentTargetTime = Math.round(currentTargetTime / 1000);
+        }
+        // If not manually edited, keep currentTargetTime as-is — no precision loss.
+    } else {
+        // Date view is visible, read directly from the date input.
+        const localDate = new Date(dateElement.value);
+        currentTargetTime = Math.round(localDate.getTime() / 1000);
+    }
+};
+
+/**
+ * Updates the target time based on the currently visible view and syncs all UI elements.
+ */
+const updateTargetTime = () => {
+    updateTargetTimeFromCurrentView();
+    updateDisplayValues();
+};
+
+/**
  * Converts a unix time stamp (seconds since 1/1/1970) into the format a <input type="datetime-local"> element expects.
  *
  * It will convert it into the local time of the user's browser.
  *
- * @param {number} unixtime the unix time stamp in seconds sind 1/1/1970
+ * @param {number} unixtime the unix time stamp in seconds since 1/1/1970
  * @returns {string} the string to be set as value of the input datetime-local element
  */
 const convertUnixtimeToDateElementFormat = (unixtime) => {
     const localTargetTime = new Date(unixtime * 1000);
-    localTargetTime.setTime(localTargetTime.getTime() - localTargetTime.getTimezoneOffset() * 60 * 1000);
-    return localTargetTime.toISOString().slice(0, 16);
+    const year = localTargetTime.getFullYear();
+    const month = String(localTargetTime.getMonth() + 1).padStart(2, '0');
+    const day = String(localTargetTime.getDate()).padStart(2, '0');
+    const hours = String(localTargetTime.getHours()).padStart(2, '0');
+    const minutes = String(localTargetTime.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
