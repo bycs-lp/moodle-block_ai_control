@@ -10,6 +10,14 @@ Plugins this is compatible with are for example:
 - tiny_ai
 - qtype_aitext
 
+## Screenshot ##
+
+<div align="center">
+
+![block_ai_control](docs/block_ai_control.png)
+
+</div>
+
 ## Requirements
 
 https://github.com/mebis-lp/moodle-local_ai_manager needs to be installed.
@@ -36,6 +44,7 @@ Alternatively, you can run
     $ php admin/cli/upgrade.php
 
 to complete the installation from the command line.
+
 
 ## Using it in a course ##
 
