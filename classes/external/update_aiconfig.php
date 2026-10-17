@@ -48,11 +48,17 @@ class update_aiconfig extends external_api {
      * @return stdClass the response object
      */
     public static function execute(array $aiconfig): stdClass {
-        global $PAGE;
+        global $DB, $PAGE;
         ['aiconfig' => $aiconfig] = self::validate_parameters(self::execute_parameters(), ['aiconfig' => $aiconfig]);
         $context = \context::instance_by_id($aiconfig['id']);
         self::validate_context($context);
-        require_capability('block/ai_control:control', $context);
+        $blockinstanceid = $DB->get_field(
+            'block_instances',
+            'id',
+            ['blockname' => 'ai_control', 'parentcontextid' => $context->id],
+            MUST_EXIST
+        );
+        require_capability('block/ai_control:control', \context_block::instance($blockinstanceid));
 
         $aiconfigobject = new aiconfig($aiconfig['id']);
         $aiconfigobject->set_enabled($aiconfig['enabled']);
