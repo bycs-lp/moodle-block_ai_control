@@ -151,6 +151,70 @@ final class hook_callbacks_test extends \advanced_testcase {
     }
 
     /**
+     * Creates a course with an ai_control block instance, a disabled AI config and an enrolled editing teacher.
+     *
+     * @return array the block context and the editing teacher role id
+     */
+    private function setup_course_with_block_and_teacher(): array {
+        global $DB;
+        $course = $this->getDataGenerator()->create_course();
+        $coursecontext = \context_course::instance($course->id);
+        $blockid = $DB->insert_record('block_instances', (object) [
+            'blockname' => 'ai_control',
+            'parentcontextid' => $coursecontext->id,
+            'showinsubcontexts' => 1,
+            'pagetypepattern' => '*',
+            'defaultregion' => 'side-pre',
+            'defaultweight' => 1,
+            'configdata' => '',
+            'timecreated' => time(),
+            'timemodified' => time(),
+        ]);
+        $aiconfig = new aiconfig($coursecontext->id);
+        $aiconfig->set_enabled(false);
+        $aiconfig->store();
+        $teacher = $this->getDataGenerator()->create_and_enrol($course, 'editingteacher');
+        $this->setUser($teacher);
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'editingteacher'], MUST_EXIST);
+        return [\context_block::instance($blockid), $roleid, $coursecontext];
+    }
+
+    /**
+     * Tests that the control capability is checked in the block context: a teacher keeps access while the AI config is disabled.
+     *
+     * @covers \block_ai_control\local\hook_callbacks::handle_additional_user_restriction
+     */
+    public function test_handle_additional_user_restriction_teacher_without_override(): void {
+        $this->resetAfterTest();
+        [, , $coursecontext] = $this->setup_course_with_block_and_teacher();
+
+        $purpose = \core\di::get(\local_ai_manager\local\connector_factory::class)->get_purpose_by_purpose_string('chat');
+        $hook = new \local_ai_manager\hook\additional_user_restriction(new userinfo(0), $coursecontext, $purpose);
+        hook_callbacks::handle_additional_user_restriction($hook);
+
+        $this->assertTrue($hook->is_allowed());
+    }
+
+    /**
+     * Tests that a prohibition of the control capability in the block context is respected by the hook, so the teacher is
+     * restricted like a student while the AI config is disabled.
+     *
+     * @covers \block_ai_control\local\hook_callbacks::handle_additional_user_restriction
+     */
+    public function test_handle_additional_user_restriction_denied_by_block_override(): void {
+        $this->resetAfterTest();
+        [$blockcontext, $roleid, $coursecontext] = $this->setup_course_with_block_and_teacher();
+        assign_capability('block/ai_control:control', CAP_PREVENT, $roleid, $blockcontext->id);
+
+        $purpose = \core\di::get(\local_ai_manager\local\connector_factory::class)->get_purpose_by_purpose_string('chat');
+        $hook = new \local_ai_manager\hook\additional_user_restriction(new userinfo(0), $coursecontext, $purpose);
+        hook_callbacks::handle_additional_user_restriction($hook);
+
+        $this->assertFalse($hook->is_allowed());
+        $this->assertSame(get_string('noaiincourse', 'block_ai_control'), $hook->get_message());
+    }
+
+    /**
      * Tests the config if the access to the AI tools is enabled including the expiry time.
      *
      * @covers \block_ai_control\local\aiconfig::is_enabled
