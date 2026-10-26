@@ -136,6 +136,7 @@ class hook_callbacks {
      * @param additional_user_restriction $hook the hook object
      */
     public static function handle_additional_user_restriction(additional_user_restriction $hook): void {
+        global $DB;
         $coursecontext = ai_manager_utils::find_closest_parent_course_context($hook->get_context());
         if (is_null($coursecontext)) {
             // We could not find a usable course context, so we do not do anything.
@@ -143,7 +144,13 @@ class hook_callbacks {
         }
         $aiconfig = new aiconfig($coursecontext->id);
 
-        if (has_capability('block/ai_control:control', $coursecontext)) {
+        $blockinstanceid = $DB->get_field(
+            'block_instances',
+            'id',
+            ['blockname' => 'ai_control', 'parentcontextid' => $coursecontext->id]
+        );
+        $controlcontext = $blockinstanceid ? \context_block::instance($blockinstanceid) : $coursecontext;
+        if (has_capability('block/ai_control:control', $controlcontext)) {
             return;
         }
 
