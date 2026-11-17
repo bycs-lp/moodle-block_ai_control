@@ -159,6 +159,11 @@ class hook_callbacks {
             return;
         }
 
+        // Internal purposes cannot be enabled in the course, they are only used by purposes which already have been checked.
+        if ($hook->get_purpose()->is_internal()) {
+            return;
+        }
+
         if (!in_array($hook->get_purpose()->get_plugin_name(), $aiconfig->get_enabledpurposes())) {
             $hook->set_access_allowed(
                 false,

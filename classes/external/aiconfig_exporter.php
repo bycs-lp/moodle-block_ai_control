@@ -111,7 +111,8 @@ class aiconfig_exporter extends exporter {
     public static function export_aiconfig_data(aiconfig $aiconfig): array {
         global $PAGE;
         $purposes = [];
-        foreach (base_purpose::get_all_purposes() as $purpose) {
+        // Internal purposes are only used by other purposes, so they cannot be controlled in the course.
+        foreach (base_purpose::get_all_purposes(false) as $purpose) {
             $purposeobject =
                 \core\di::get(\local_ai_manager\local\connector_factory::class)->get_purpose_by_purpose_string($purpose);
             $purposedata = purpose_exporter::export_purpose_data($aiconfig, $purposeobject);
