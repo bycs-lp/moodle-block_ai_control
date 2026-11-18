@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->release = 'v2.2';
 $plugin->version = 2025120400;
 $plugin->requires = 2024042200;
-$plugin->supported = [500, 501];
+$plugin->supported = [500, 503];
 $plugin->component = 'block_ai_control';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = [
